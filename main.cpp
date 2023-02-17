@@ -244,6 +244,18 @@ quad_search_time = quad_search_end - quad_search_start;
     cout << "DOUBLE HASHING FOUND : " << double_num_wrong << " INCORRECTLY SPELLED WORD \nTime Spent Creating Hash Table (Double Hashing) : " << double_hash_time.count() << endl;
     cout << "Time Searching (Double Hashing) : " << double_search_time.count() << endl << endl;
 
+    double min_hash = min({quad_hash_time.count(), chaining_hash_time.count() , double_hash_time.count() });
+    
+    if (min_hash == quad_hash_time.count()){cout << "Most Efficient Creating Hash Table Is Quadratic Probing\n";}
+    else if(min_hash == chaining_hash_time.count()){cout << "Most Efficient Creating Hash Table Is Chaining\n";}
+    else{cout << "Most Efficient Creating Hash Table is Double Hashing\n";}
+
+    double min_search = min({quad_search_time.count(), chaining_search_time.count() , double_search_time.count() });
+    if (min_search == quad_search_time.count()){cout << "Most Efficient Searching Hash Table Is Quadratic Probing\n";}
+    else if(min_search == chaining_search_time.count()){cout << "Most Searching Creating Hash Table Is Chaining\n";}
+    else{cout << "Most Searching Creating Hash Table is Double Hashing\n";}
+
+
     chaining_dictionary_file.close();
     chaining_input_file.close();
 
