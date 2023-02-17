@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <sstream>
 
 using namespace std::chrono;
 
@@ -80,6 +81,10 @@ int main(int argc, const char * argv[]){
     duration<double, nano> chaining_hash_time;
     duration<double, nano> double_hash_time;
 
+    duration<double, nano> quad_search_time;
+    duration<double, nano> chaining_search_time;
+    duration<double, nano> double_search_time;
+
 
     int chaining_num_wrong = 0;
     int quad_num_wrong = 0;
@@ -97,24 +102,36 @@ int main(int argc, const char * argv[]){
 
     string quad_dict_word;
     auto quadStart = high_resolution_clock::now();
-    while(quad_dictionary_file >> quad_dict_word){
-        qp.insert(quad_dict_word);
+   while (quad_dictionary_file >> quad_dict_word) {
+    stringstream split_hyphen(quad_dict_word);
+    string word;
+    while (getline(split_hyphen, word, '-')) {
+        qp.insert(word);
     }
+}
     auto quadEnd = high_resolution_clock::now();
     quad_hash_time = quadEnd - quadStart;
 
 
-    string quad_check_word;
-    while(quad_input_file >> quad_check_word){
-        if(qp.search(quad_check_word) == "WNF"){
-            quad_num_wrong++;
+string quad_check_word;
+auto quad_search_start = high_resolution_clock::now();
+while (quad_input_file >> quad_check_word) {
+    stringstream split_hyphen(quad_check_word);
+    string word;
+    bool all_words_found = true;
+    while (getline(split_hyphen, word, '-')) {
+        if (qp.search(word) == "WNF") {
+            all_words_found = false;
+            break;
         }
-        else{
-            continue;
-        }
+    }
+    if (!all_words_found) {
+        quad_num_wrong++;
+    }
 
-    }
-    }
+}
+auto quad_search_end = high_resolution_clock::now();
+quad_search_time = quad_search_end - quad_search_start;
 
     quad_dictionary_file.close();
     quad_input_file.close();
@@ -132,27 +149,42 @@ int main(int argc, const char * argv[]){
     }
     else{
 
-        string chaining_dict_word;
-        auto chainingStart = high_resolution_clock::now();
-        while(chaining_dictionary_file >> chaining_dict_word){
-        c.insert(chaining_dict_word);
-    }
-        auto chainingEnd = high_resolution_clock::now();
-        chaining_hash_time = chainingEnd - chainingStart;
-
-
-    string chaining_check_word;
-    while(chaining_input_file >> chaining_check_word){
-        if(c.search(chaining_check_word) == "WNF"){
-            chaining_num_wrong++;
+            string chaining_dict_word;
+            auto chainingStart = high_resolution_clock::now();
+        while (chaining_dictionary_file >> chaining_dict_word) {
+            stringstream split_hyphen(chaining_dict_word);
+            string word;
+            while (getline(split_hyphen, word, '-')) {
+                c.insert(word);
+            }
         }
-        else{
-            continue;
+            auto chainingEnd = high_resolution_clock::now();
+            chaining_hash_time = chainingEnd - chainingStart;
+
+
+        string chaining_check;
+        auto chaining_search_start = high_resolution_clock::now();
+
+        while (chaining_input_file >> chaining_check) {
+            stringstream split_hyphen(chaining_check);
+            string word;
+            bool all_words_found = true;
+            while (getline(split_hyphen, word, '-')) {
+                if (c.search(word) == "WNF") {
+                    all_words_found = false;
+                    break;
+                }
+            }
+            if (!all_words_found) {
+                chaining_num_wrong++;
+            }
         }
+        auto chaining_search_end = high_resolution_clock::now();
+        chaining_search_time = chaining_search_end - chaining_search_start;
 
-    }
+        } // end elkse
 
-    }
+
     //END OF CHAINING
 
     //START OF DOUBLE HASH
@@ -164,27 +196,40 @@ int main(int argc, const char * argv[]){
         return 0;
     }
     else{
-
-        string double_dict_word;
-        auto doubleStart = high_resolution_clock::now();
-        while(double_dict_file >> double_dict_word){
-        dh.insert(double_dict_word);
-    }
-        auto doubleEnd = high_resolution_clock::now();
-        double_hash_time = doubleEnd - doubleStart;
-
-
-    string double_search;
-    while(double_input_file >> double_search){
-        if(dh.search(double_search) == "WNF"){
-            cout << double_search << endl;
-            double_num_wrong++;
+            string double_dict_word;
+            auto doubleStart = high_resolution_clock::now();
+        while (double_dict_file >> double_dict_word) {
+            stringstream split_hyphen(double_dict_word);
+            string word;
+            while (getline(split_hyphen, word, '-')) {
+                dh.insert(word);
+            }
         }
-        else{
-            continue;
+            auto doubleEnd = high_resolution_clock::now();
+            double_hash_time = doubleEnd - doubleStart;
+
+
+        string double_check;
+        auto double_search_start = high_resolution_clock::now();
+        while (double_input_file >> double_check) {
+            stringstream split_hyphen(double_check);
+            string word;
+            bool all_words_found = true;
+            while (getline(split_hyphen, word, '-')) {
+                if (dh.search(word) == "WNF") {
+                    all_words_found = false;
+                    break;
+                }
+            }
+            if (!all_words_found) {
+                double_num_wrong++;
+            }
+        }
+        auto double_search_end = high_resolution_clock::now();
+        double_search_time = double_search_end - double_search_start;
+
         }
 
-    }
 
     }
     // END DOUBLE HASH
@@ -192,9 +237,12 @@ int main(int argc, const char * argv[]){
     double_dict_file.close();
     double_input_file.close();
 
-    cout << "QUADRATIC PROBING FOUND : " << quad_num_wrong << " INCORRECTLY SPELLED WORDS \nTIME SPENT CREATING HASH TABLE (QUADRATIC PROBING): " << quad_hash_time.count() << endl << endl;
-    cout << "CHAINING FOUND : " << chaining_num_wrong << " INCORRECTLY SPELLED WORDS \nTIME SPENT CREATING HASH TABLE (CHAINING) : " << chaining_hash_time.count() << endl << endl;
-    cout << "DOUBLE HASHING FOUND : " << double_num_wrong << " INCORRECTLY SPELLED WORD \nTIME SPENT CREATING HASH TABLE (DOUBLE) : " << double_hash_time.count() << endl;
+    cout << "QUADRATIC PROBING FOUND : " << quad_num_wrong << " INCORRECTLY SPELLED WORDS \nTme Creating Hash Table (Quadratic Probing): " << quad_hash_time.count() << endl;
+    cout << "Time Searching (Quadratic Probing) : " << quad_search_time.count() << endl << endl;
+    cout << "CHAINING FOUND : " << chaining_num_wrong << " INCORRECTLY SPELLED WORDS \nTime Spent Creating Hash Table (Chaining) : " << chaining_hash_time.count() << endl;
+    cout << "Time Searching (Chaining) : " << chaining_search_time.count() << endl << endl;
+    cout << "DOUBLE HASHING FOUND : " << double_num_wrong << " INCORRECTLY SPELLED WORD \nTime Spent Creating Hash Table (Double Hashing) : " << double_hash_time.count() << endl;
+    cout << "Time Searching (Double Hashing) : " << double_search_time.count() << endl << endl;
 
     chaining_dictionary_file.close();
     chaining_input_file.close();
